@@ -1,24 +1,40 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text } from 'react-native';
+import { StatusBar, useColorScheme } from 'react-native';
+import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { store } from './store';
+import AppNavigator from './navigation/AppNavigator';
+import { darkTheme, lightTheme } from './theme/paperTheme';
+import { useSelector } from 'react-redux';
+import { RootState } from './store';
 
-const App = () => {
+// 主题包装组件，用于在Redux和PaperProvider之间传递主题
+const ThemedApp = () => {
+  const { theme: appTheme } = useSelector((state: RootState) => state.appSettings);
+  const deviceTheme = useColorScheme();
+  
+  // 确定当前主题
+  const themePreference = appTheme === 'system' ? deviceTheme : appTheme;
+  const theme = themePreference === 'dark' ? darkTheme : lightTheme;
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>PocketMind App</Text>
-    </SafeAreaView>
+    <PaperProvider theme={theme}>
+      <StatusBar 
+        barStyle={themePreference === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.background}
+      />
+      <AppNavigator />
+    </PaperProvider>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-});
+// 应用根组件
+const App = () => {
+  return (
+    <ReduxProvider store={store}>
+      <ThemedApp />
+    </ReduxProvider>
+  );
+};
 
 export default App;
