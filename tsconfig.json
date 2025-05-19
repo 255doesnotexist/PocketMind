@@ -2,7 +2,9 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "commonjs",
-    "lib": ["es2017"],
+    "lib": [
+      "es2017"
+    ],
     "allowJs": true,
     "jsx": "react-native",
     "noEmit": true,
@@ -15,18 +17,42 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@components/*": ["src/components/*"],
-      "@features/*": ["src/features/*"],
-      "@utils/*": ["src/utils/*"],
-      "@services/*": ["src/services/*"],
-      "@hooks/*": ["src/hooks/*"],
-      "@constants/*": ["src/constants/*"],
-      "@theme/*": ["src/theme/*"],
-      "@store/*": ["src/store/*"],
-      "@navigation/*": ["src/navigation/*"],
-      "@config/*": ["src/config/*"],
-      "@api/*": ["src/api/*"],
-      "@assets/*": ["src/assets/*"]
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@features/*": [
+        "src/features/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@services/*": [
+        "src/services/*"
+      ],
+      "@hooks/*": [
+        "src/hooks/*"
+      ],
+      "@constants/*": [
+        "src/constants/*"
+      ],
+      "@theme/*": [
+        "src/theme/*"
+      ],
+      "@store/*": [
+        "src/store/*"
+      ],
+      "@navigation/*": [
+        "src/navigation/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@api/*": [
+        "src/api/*"
+      ],
+      "@assets/*": [
+        "src/assets/*"
+      ]
     }
   },
   "exclude": [
@@ -34,5 +60,6 @@
     "babel.config.js",
     "metro.config.js",
     "jest.config.js"
-  ]
-} 
+  ],
+  "extends": "expo/tsconfig.base"
+}
