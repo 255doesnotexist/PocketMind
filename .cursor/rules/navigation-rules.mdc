@@ -1,0 +1,36 @@
+---
+description: Guidelines for using React Navigation.
+globs: ["src/navigation/**/*.tsx", "src/features/**/screens/**/*.tsx"]
+alwaysApply: false
+type: Auto Attached
+---
+
+# React Navigation Guidelines for PocketMind
+
+## Core Library
+- Utilize `react-navigation` (v6 or latest stable) for all screen navigation.
+- Key packages: `@react-navigation/native`, `@react-navigation/stack`, `@react-navigation/bottom-tabs`.
+
+## Structure
+- **Root Navigator:** `src/navigation/AppNavigator.tsx` will define the main navigation structure (e.g., a StackNavigator containing a MainTabNavigator or authentication flow).
+- **Tab Navigator:** `src/navigation/MainTabNavigator.tsx` will define the primary bottom tab navigation (Chat, Model Settings, Model Management, App Settings).
+- **Screen Components:** Screen components are located in `src/features/<featureName>/screens/`.
+- **Type Safety:**
+    - Strongly type your navigators, screens, and route params. Create a `types.ts` file within `src/navigation/` (e.g., `RootStackParamList`, `MainTabParamList`).
+    - Use these types with `createStackNavigator<RootStackParamList>()` and when defining screen component props (`NativeStackScreenProps<'ScreenName', RootStackParamList>`).
+
+## Navigation Actions
+- Use `navigation.navigate('ScreenName', { params })` for navigating.
+- Use `navigation.goBack()` to go back.
+- Use `navigation.setOptions({ title: 'New Title' })` to configure screen options dynamically from within the screen component.
+
+## Screen Options
+- Configure screen options (header title, header visibility, tab bar icons, etc.) within the navigator definition or using `navigation.setOptions`.
+- For tab bar icons, use `react-native-paper` `Icon` component and integrate with `tabBarIcon` option.
+- Ensure `Appbar` from `react-native-paper` is correctly integrated for screen headers if custom headers are needed.
+
+## Best Practices
+- Avoid passing complex objects or functions as navigation params. Pass IDs or simple data and fetch/derive complex data within the screen.
+- Keep navigation logic clean and centralized in the `src/navigation/` directory as much as possible.
+- Use `useNavigation`, `useRoute` hooks within screen components.
+```

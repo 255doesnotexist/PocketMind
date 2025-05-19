@@ -1,0 +1,44 @@
+---
+description: Guidelines and reminders for using the llama.rn library.
+globs: ["src/features/chat/services/LlamaService.ts", "src/features/chat/screens/ChatScreen.tsx"]
+alwaysApply: false
+type: Auto Attached
+---
+
+# `llama.rn` Usage Guidelines for PocketMind
+
+## Core Service: `src/features/chat/services/LlamaService.ts`
+- All direct interactions with `llama.rn` should be encapsulated within `LlamaService.ts`.
+- **Initialization (`initLlama`):**
+    - Ensure model path is correct (`file:///...`).
+    - Handle potential errors during initialization.
+    - Reference: `initLlama` from `llama.rn` docs.
+- **Text Generation (`generateCompletion` / `completionWithSession`):**
+    - Pass `CompletionParams` correctly (temperature, top_p, stop sequences, etc.). These should come from `SettingsService` or Redux store.
+    - Implement support for `onToken` callback for streaming output to the UI.
+    - Properly format the prompt, especially for Qwen3 (chat templates, `/think`, `/no_think` commands).
+- **Stopping Generation (`stopCurrentCompletion`):**
+    - Provide a way to stop ongoing generation.
+- **Releasing Context (`releaseContext`):**
+    - Ensure the context is released when the model is no longer needed or when switching models to free up resources.
+- **Model Info (`loadLlamaModelInfo`):**
+    - Use to display information about the loaded model.
+
+## Multimodal Input (Qwen3-VL)
+- **Challenge:** `llama.rn`'s documentation does not explicitly detail direct image input for multimodal models like Qwen3-VL.
+- **Action:**
+    1.  **Research:** Continuously check `llama.rn` and `llama.cpp` updates for official multimodal support (e.g., how `llava` models are handled in `llama.cpp` often involves special prompt formatting or image pre-processing and embedding).
+    2.  **Prompt Formatting:** If supported via prompt, images will likely need to be Base64 encoded and embedded within the prompt using a specific syntax (e.g., `[img-हारी]` or similar, followed by Base64 string). This needs to be confirmed for Qwen3 GGUF.
+    3.  **Fallback/Alternative:** If direct `llama.rn` support is unavailable, initial image handling might be limited or require MCP server interaction (as a last resort for full functionality, clearly marking it as an online feature).
+- **Implementation in `LlamaService.ts`:**
+    - The `generateCompletion` method should be designed to accept an optional `imageBase64?: string`.
+    - The prompt formatting logic needs to be adapted if a prompt-based image embedding method is found.
+
+## Error Handling
+- Wrap all `llama.rn` calls in `try...catch` blocks and handle errors gracefully, providing feedback to the user or logging appropriately.
+
+## Performance
+- Be mindful of model loading times.
+- Consider if `llama.rn` offers options for GPU delegation on Android (via `llama.cpp` capabilities) and how to enable them if available and beneficial.
+
+Official `llama.rn` documentation: [https://github.com/mybigday/llama.rn](https://github.com/mybigday/llama.rn)

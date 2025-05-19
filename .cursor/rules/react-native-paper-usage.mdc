@@ -1,0 +1,37 @@
+---
+description: Guidelines for using React Native Paper components and theming.
+globs: ["*.tsx"]
+alwaysApply: false
+type: Auto Attached # Apply when .tsx files are in context
+---
+
+# React Native Paper Usage in PocketMind
+
+## General
+- **Import:** Import components directly from `react-native-paper`.
+  `import { Button, Card, Text } from 'react-native-paper';`
+- **Material You (MD3):** Ensure all usage aligns with Material You (MD3) principles. Prioritize components that have full MD3 support in React Native Paper.
+- **Theming:**
+    - Utilize the theme defined in `src/theme/paperTheme.ts`. Access theme properties via `useTheme` hook from `react-native-paper`.
+    - `const theme = useTheme();`
+    - `const { colors, roundness, fonts } = useTheme();`
+    - Do not hardcode color values; always use `theme.colors.<colorName>`.
+- **Accessibility:** Leverage built-in accessibility features of Paper components and supplement with a11y props as needed.
+
+## Component Specific Guidelines
+- **`Text`:** Use the `variant` prop for appropriate typography according to MD3 type scale (e.g., `displayLarge`, `titleMedium`, `bodySmall`).
+  `<Text variant="headlineSmall">My Headline</Text>`
+- **`Button`:** Use appropriate modes (`text`, `outlined`, `contained`, `elevated`, `contained-tonal`).
+  `<Button mode="contained" onPress={handler}>Submit</Button>`
+- **`TextInput`:** Use the available modes (`flat`, `outlined`) as per design requirements. Ensure labels and helper texts are provided.
+- **`IconButton`:** Use for icon-only buttons. Provide an `accessibilityLabel`.
+- **Layout & Surfaces:** Utilize `Card`, `Surface`, `Appbar` for structuring content.
+- **Lists:** Use `List.Item`, `List.Section`, `List.Accordion`.
+- **Dialogs & Modals:** Use `Modal`, `Dialog`, `Portal` for overlays.
+- **Navigation Components:** While Paper has some navigation-related components, primary navigation will be handled by `react-navigation`. Integrate Paper components (like `Appbar`) with `react-navigation` screens.
+
+## Customization
+- If a Paper component needs slight style deviations not covered by the theme, apply them judiciously via the `style` prop, but prefer extending the theme if the change is common.
+- For complex custom components that build upon Paper components, ensure they still respect the overall theme.
+
+Refer to the official React Native Paper documentation for component APIs and examples: [https://callstack.github.io/react-native-paper/](https://callstack.github.io/react-native-paper/)

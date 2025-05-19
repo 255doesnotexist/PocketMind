@@ -1,0 +1,84 @@
+---
+description: Guidelines for using Redux Toolkit for state management.
+globs: ["*.ts", "*.tsx"]
+alwaysApply: false
+type: Auto Attached
+---
+
+# Redux Toolkit State Management in PocketMind
+
+## Core Principles
+- **Redux Toolkit:** Utilize `@reduxjs/toolkit` for all Redux logic. Avoid "manual" Redux setup.
+- **Immutability:** Reducers must be pure functions and treat state as immutable. Immer is used by default in `createSlice`, so direct mutation syntax is allowed *within* `createSlice` reducers.
+- **Single Source of Truth:** The Redux store is the single source of truth for global application state.
+- **Slice Structure:** Organize state into feature-based slices (e.g., `chatSlice.ts`, `modelSettingsSlice.ts`) located in `src/features/<featureName>/store/`.
+
+## `createSlice`
+- Use `createSlice` to generate reducers, action creators, and action types automatically.
+- Define `initialState` clearly for each slice.
+- Name reducers descriptively.
+
+```typescript
+// Example: src/features/chat/store/chatSlice.ts
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Message } from '../types'; // Assuming Message type is defined
+
+interface ChatState {
+  messages: Message[];
+  isLoading: boolean;
+}
+
+const initialState: ChatState = {
+  messages: [],
+  isLoading: false,
+};
+
+const chatSlice = createSlice({
+  name: 'chat',
+  initialState,
+  reducers: {
+    addMessage(state, action: PayloadAction<Message>) {
+      state.messages.push(action.payload);
+    },
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.isLoading = action.payload;
+    },
+    // ... other reducers
+  },
+});
+
+export const { addMessage, setLoading } = chatSlice.actions;
+export default chatSlice.reducer;
+```
+
+## Store Configuration
+- Configure the root store in `src/store/index.ts` using `configureStore` from Redux Toolkit.
+- Combine slice reducers in `src/store/rootReducer.ts` (if not directly in `configureStore`).
+
+## Connecting Components
+- Use `useSelector` hook from `react-redux` to read state from the store. Be specific with selectors to avoid unnecessary re-renders.
+  `const messages = useSelector((state: RootState) => state.chat.messages);`
+- Use `useDispatch` hook from `react-redux` to dispatch actions.
+  `const dispatch = useDispatch(); dispatch(addMessage(newMessage));`
+
+## Asynchronous Logic (Thunks)
+- For asynchronous operations (e.g., API calls, complex async flows before updating state), use Thunks. Redux Toolkit's `configureStore` enables thunk middleware by default.
+- Define thunks within your slice files or in separate thunk files if they become complex.
+  ```typescript
+  // Example thunk
+  export const fetchModelParameters = (modelId: string): AppThunk => async (dispatch) => {
+    try {
+      // const params = await someApiService.fetchParams(modelId);
+      // dispatch(modelSettingsSlice.actions.setParameters(params));
+    } catch (error) {
+      // dispatch(someErrorAction(error.message));
+    }
+  };
+  ```
+  (Requires `AppThunk` type definition: `export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, Action<string>>;`)
+
+## Selectors
+- Create memoized selectors using `createSelector` from `reselect` (or directly within `useSelector` for simple cases) for derived data to optimize performance. Place them in `selectors.ts` within the slice directory.
+
+## DevTools
+- Ensure Redux DevTools are usable during development.

@@ -1,0 +1,42 @@
+---
+description: Reminders about the project's file and directory structure.
+globs: *
+alwaysApply: false
+---
+
+# PocketMind File Structure Guidelines
+
+## Key Principle: Modularity and Feature-First
+The project follows a feature-first organization within the `src/features/` directory. Each major piece of functionality (chat, model management, settings, etc.) resides in its own sub-directory.
+
+## Top-Level `src/` Directories:
+- **`@types/`**: Global TypeScript type definitions (`*.d.ts`).
+- **`api/`**: Network request modules (e.g., `mcpApi.ts`).
+- **`assets/`**: Static assets (fonts, images, bundled ML models in `assets/models/`).
+- **`components/`**: Globally reusable, presentational UI components.
+    - `common/`: Very basic, app-wide components (AppButton, AppTextInput).
+    - Feature-specific reusable components (e.g., `chat/MessageBubble.tsx`).
+- **`config/`**: Application-level configuration (`appConfig.ts`, `modelConfig.ts`).
+- **`constants/`**: Immutable values (`colors.ts`, `strings.ts`, `theme.ts` for Paper).
+- **`features/`**: Core application logic, organized by feature. Each feature folder may contain:
+    - `components/`: Components specific to this feature.
+    - `hooks/`: Custom React Hooks for this feature.
+    - `screens/`: Screen-level components for this feature.
+    - `services/`: Business logic, API interactions, native module interactions for this feature.
+    - `store/`: Redux Toolkit slice, selectors, thunks for this feature.
+    - `types.ts`: TypeScript types specific to this feature.
+    - `utils/`: Utility functions specific to this feature.
+- **`hooks/`**: Globally reusable custom React Hooks.
+- **`navigation/`**: React Navigation setup (`AppNavigator.tsx`, `MainTabNavigator.tsx`, `types.ts`).
+- **`services/`**: Global services not tied to a single feature (e.g., `PermissionsService.ts`).
+- **`store/`**: Redux Toolkit store setup (`index.ts`, `rootReducer.ts`).
+- **`theme/`**: Global styling and theme configuration (`paperTheme.ts`, `globalStyles.ts`).
+- **`utils/`**: Globally reusable utility functions (`fileUtils.ts`, `formatters.ts`).
+- **`App.tsx`**: Root application component.
+
+## Naming Conventions
+- Files: `PascalCase.tsx` for React components, `camelCase.ts` for other TS files (or `PascalCase.ts` for classes/services).
+- Folders: `camelCase` or `kebab-case`.
+
+**Reference `STRUCTURE.md` in the project root for the detailed visual layout.**
+When creating new files or features, adhere to this structure to maintain consistency and discoverability.

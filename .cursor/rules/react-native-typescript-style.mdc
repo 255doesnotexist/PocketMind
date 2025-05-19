@@ -1,0 +1,59 @@
+---
+description: Coding style and best practices for React Native and TypeScript in the PocketMind project.
+globs: ["*.ts", "*.tsx"]
+alwaysApply: true # Enforce consistently
+type: Always
+---
+
+# React Native & TypeScript Coding Style for PocketMind
+
+## General TypeScript
+- **Strict Mode:** Always enable strict mode in `tsconfig.json`.
+- **Typing:**
+    - Provide explicit types for all function parameters and return values.
+    - Use interfaces for defining object shapes (props, state, API responses) over `type` aliases where appropriate (interfaces are better for extension).
+    - Prefer `unknown` over `any` where possible. Use `any` sparingly and only when absolutely necessary.
+    - Use utility types (e.g., `Partial`, `Readonly`, `ReturnType`) where beneficial.
+- **Modules:** Use ES6 modules (`import`/`export`). Default exports are generally discouraged for better tree-shaking and explicit naming; prefer named exports.
+- **Naming Conventions:**
+    - `PascalCase` for components, interfaces, enums, and type aliases.
+    - `camelCase` for variables, functions, and object properties.
+    - `UPPER_SNAKE_CASE` for constants.
+    - Boolean variables should often be prefixed with `is`, `has`, `should` (e.g., `isLoading`).
+- **Linting & Formatting:**
+    - Adhere strictly to ESLint and Prettier rules defined in the project (`.eslintrc.js`, `.prettierrc.js`).
+    - Format code on save.
+    - No TSLint (it's deprecated).
+- **Comments:**
+    - Write clear and concise JSDoc comments for all exported functions, classes, and complex logic.
+    - Use `// TODO:` for tasks to be done and `// FIXME:` for known issues that need fixing.
+
+## React Native Specifics
+- **Functional Components:** Strongly prefer Functional Components with Hooks over Class Components.
+- **Hooks:**
+    - Follow the Rules of Hooks.
+    - Create custom hooks for reusable stateful logic, placing them in `src/hooks/` or feature-specific `hooks/` directories.
+- **Styling:**
+    - Use `StyleSheet.create` for all component styles.
+    - Avoid inline styles.
+    - Organize styles logically within the `StyleSheet.create` object.
+    - Refer to `src/theme/paperTheme.ts` and `src/constants/colors.ts` for theme colors and consistent styling.
+- **Performance:**
+    - Use `React.memo` for components that re-render unnecessarily.
+    - Use `useCallback` for functions passed as props to memoized children.
+    - Use `useMemo` for expensive computations.
+    - Optimize `FlatList` performance (e.g., `keyExtractor`, `getItemLayout`, `initialNumToRender`, `windowSize`).
+- **Accessibility (A11y):**
+    - Always include `accessibilityLabel`, `accessibilityHint`, and other relevant accessibility props for interactive elements.
+- **Error Handling:**
+    - Implement robust error handling using `try...catch` for asynchronous operations and provide user-friendly error messages or fallbacks.
+- **File Naming:**
+    - Components: `MyComponent.tsx`
+    - Screens: `MyScreen.tsx`
+    - Services: `MyService.ts`
+    - Hooks: `useMyHook.ts`
+
+## Code Structure
+- Follow the directory structure outlined in `STRUCTURE.md`.
+- Keep components small and focused (Single Responsibility Principle).
+- Group related logic within feature modules (`src/features/`).

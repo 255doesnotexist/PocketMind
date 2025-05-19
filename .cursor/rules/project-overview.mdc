@@ -1,0 +1,36 @@
+---
+description: General overview of the PocketMind project, its goals, and core technologies. This rule should provide high-level context.
+globs: ["*"] # Apply broadly, or make it 'Agent Requested' if too verbose for every interaction
+alwaysApply: false # Or true if you want it always prepended. Consider token limits. Agent Requested is often better for broad overviews.
+type: Agent Requested # The agent can decide to use this rule based on the description.
+---
+
+# PocketMind Project Overview
+
+## Core Goal
+PocketMind is an Android-first local AI reasoning tool utilizing llama.cpp bindings to run small language models (initially Qwen3 0.6B) offline on-device. It supports multimodal interaction (text and image) and aims for a user-friendly Material You interface.
+
+## Key Technologies
+- **Framework:** React Native (TypeScript)
+- **UI:** React Native Paper (Material You - MD3)
+- **State Management:** Redux Toolkit
+- **Navigation:** React Navigation
+- **Core LLM Binding:** `llama.rn` (for llama.cpp)
+- **Speech-to-Text Binding:** `whisper.rn` (for whisper.cpp)
+- **File System:** `react-native-fs`
+- **Image Picker:** `react-native-image-picker`
+
+## Target Audience & Core Features
+- Users ఎవరు Android上でローカルでAIモデルを実行したい。
+- Multimodal chat with Qwen3 (text, image).
+- Handling of `<thinking>` tags and Qwen3's inference mode toggles.
+- Adjustable inference parameters with mode-specific defaults.
+- Model downloading from HuggingFace/ModelScope (primarily Qwen3 0.6B GGUF).
+- Compatibility with other GGML/GGUF models.
+- Offline-first, with optional MCP server integration.
+
+## Development Environment
+- Primary JS/TS development in VSCode.
+- Android native aspects, emulators, and final builds via Android Studio.
+
+Remember to consult the `STRUCTURE.md` and `DOCS.md` (soon to be `DEVELOPMENT_PLAN.md`) in the project root for detailed architecture and plans.

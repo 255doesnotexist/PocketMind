@@ -1,0 +1,45 @@
+---
+description: Guidelines and reminders for using the whisper.rn library.
+globs: ["src/features/speechToText/**/*.ts", "src/features/speechToText/**/*.tsx"]
+alwaysApply: false
+type: Auto Attached
+---
+
+# `whisper.rn` Usage Guidelines for PocketMind
+
+## Core Service: `src/features/speechToText/services/WhisperService.ts`
+- Encapsulate all `whisper.rn` interactions here.
+- **Initialization (`initWhisper`):**
+    - Model path can be from app assets (`require(...)`) or local file system (`file:///...`). Ensure `metro.config.js` handles `.bin` and `.mil` (for CoreML) asset extensions.
+    - Handle CoreML model assets for iOS if implementing.
+    - Reference: `initWhisper` from `whisper.rn` docs.
+- **Realtime Transcription (`transcribeRealtime`):**
+    - Request `RECORD_AUDIO` permission on Android using `PermissionsAndroid` before starting.
+    - Handle iOS Audio Session configuration if needed (see `AudioSessionIos` utilities in `whisper.rn`).
+    - Use the `subscribe` method to get events (`isCapturing`, `data`, `processTime`, `recordingTime`).
+    - Provide a `stop` function to halt transcription.
+- **File Transcription (`transcribe`):**
+    - For transcribing pre-recorded audio files (optional feature).
+- **Releasing Context (`releaseContext`):**
+    - Release context when done to free resources.
+
+## Custom Hook: `src/features/speechToText/hooks/useWhisper.ts`
+- This hook should abstract the complexities of `WhisperService` for UI components.
+- Manage states: `isRecording`, `transcript`, `error`.
+- Expose methods: `startRecording`, `stopRecording`.
+- Handle permission requests internally.
+
+## UI Component: `src/features/speechToText/components/RecordButton.tsx`
+- Uses `useWhisper` hook.
+- Visually indicates recording state.
+- On receiving transcript, passes it to the chat input.
+
+## Model Files
+- Small Whisper models (e.g., `ggml-tiny.en.bin`) are suitable for on-device use.
+- These can be bundled in `src/assets/models/` or downloaded similar to LLM models.
+
+## Error Handling & Permissions
+- Robustly handle permission denials.
+- Catch errors from `whisper.rn` API calls.
+
+Official `whisper.rn` documentation: [https://github.com/mybigday/whisper.rn](https://github.com/mybigday/whisper.rn)

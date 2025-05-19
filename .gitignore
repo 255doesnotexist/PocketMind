@@ -1,0 +1,5 @@
+DOCS.md
+STRUCTURE.md
+
+node_modules/
+package-lock.json
