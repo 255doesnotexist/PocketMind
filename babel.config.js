@@ -24,6 +24,7 @@ module.exports = {
           '@assets': './src/assets'
         }
       }
-    ]
+    ],
+    'react-native-reanimated/plugin'
   ]
 };

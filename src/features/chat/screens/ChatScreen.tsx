@@ -28,10 +28,22 @@ const ChatScreen = () => {
         // 确保模型目录存在
         await LocalModelStorageService.ensureModelDirectory();
 
+        // 获取模型名称
+        const modelName = currentModelId || DEFAULT_QWEN_MODEL_FILENAME;
         // 获取模型路径
         const modelPath = LocalModelStorageService.getModelFileUri(
-          currentModelId || DEFAULT_QWEN_MODEL_FILENAME
+          modelName
         );
+
+        // 检查模型文件是否存在
+        const fileExists = await LocalModelStorageService.modelExists(modelName);
+        if (!fileExists) {
+          console.error(`Model file not found at path: ${modelPath}`);
+          // 可以选择抛出错误或者设置一个状态来通知用户
+          // throw new Error(`Model file not found: ${modelName}`);
+          setModelLoaded(false); // 明确设置模型未加载
+          return; // 提前返回，不尝试初始化
+        }
 
         // 初始化Llama服务
         const success = await LlamaService.initLlama(modelPath);
@@ -133,9 +145,12 @@ const ChatScreen = () => {
     }
   };
 
+  console.log(messages);
+  console.log('Model loaded:', modelLoaded);
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <FlatList
+      {/* <FlatList
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -144,8 +159,7 @@ const ChatScreen = () => {
             isThinkingMode={isThinkingModeActive}
           />
         )}
-        contentContainerStyle={styles.messagesContainer}
-      />
+      /> */}
       
       <ChatInputBar
         value={inputText}

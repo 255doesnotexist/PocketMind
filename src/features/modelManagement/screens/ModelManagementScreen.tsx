@@ -18,7 +18,7 @@ import ModelDownloaderService from '../services/ModelDownloaderService';
 import { setCurrentModelId } from '../../modelSettings/store/settingsSlice';
 import ModelListItem from '../components/ModelListItem';
 import { DEFAULT_QWEN_MODEL_FILENAME } from '../../../config/modelConfig';
-import RNFS from 'react-native-fs';
+import * as RNFS from '@dr.pogodin/react-native-fs';
 
 const ModelManagementScreen = () => {
   const theme = useTheme();
@@ -28,6 +28,7 @@ const ModelManagementScreen = () => {
     isDownloading, 
     downloadProgress,
   } = useSelector((state: RootState) => state.modelManagement);
+  const currentModelId = useSelector((state: RootState) => state.settings.currentModelId); // Get currentModelId from settings slice
   
   const [downloadUrl, setLocalDownloadUrl] = useState<string>('');
   const [downloadFilename, setLocalDownloadFilename] = useState<string>('');
@@ -41,7 +42,6 @@ const ModelManagementScreen = () => {
       dispatch(setLocalModels(models));
 
       // 如果有选定的模型，更新其isSelected属性
-      const { currentModelId } = await import('../../modelSettings/store/settingsSlice');
       if (currentModelId) {
         dispatch(selectModel(currentModelId));
       } else if (models.length > 0) {

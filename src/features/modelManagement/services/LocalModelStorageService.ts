@@ -1,10 +1,11 @@
-import RNFS from 'react-native-fs';
+import * as RNFS from '@dr.pogodin/react-native-fs';
 
 interface LocalModelInfo {
+  id: string; // Add id property
   name: string;
   path: string;
   size: number;
-  lastModified: Date;
+  lastModified: number; // Changed from Date to number
   // Add other relevant properties if needed
 }
 
@@ -52,10 +53,11 @@ class LocalModelStorageService {
       for (const item of items) {
         if (item.isFile() && (item.name.endsWith('.gguf') || item.name.endsWith('.bin'))) { // Adjust extensions as needed
           models.push({
+            id: item.path, // Use path as id
             name: item.name,
             path: item.path,
             size: item.size,
-            lastModified: item.mtime || new Date(),
+            lastModified: (item.mtime || new Date()).getTime(), // Convert Date to timestamp
           });
         }
       }

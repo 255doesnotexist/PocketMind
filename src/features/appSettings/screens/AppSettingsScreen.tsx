@@ -4,7 +4,7 @@ import { Button, Card, Dialog, Divider, List, Portal, RadioButton, Text, TextInp
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { setMcpServerUrl, setTheme } from '../store/appSettingsSlice';
-import RNFS from 'react-native-fs';
+import * as RNFS from '@dr.pogodin/react-native-fs';
 import LocalModelStorageService from '../../modelManagement/services/LocalModelStorageService';
 
 const AppSettingsScreen = () => {

@@ -1,5 +1,5 @@
 // 模型文件名配置
-export const DEFAULT_QWEN_MODEL_FILENAME = "qwen3_0.6b-gguf-q4_k_m.gguf";
+export const DEFAULT_QWEN_MODEL_FILENAME = "Qwen3-0.6B-Q8_0.gguf";
 
 // 推理模式参数配置
 export const DEFAULT_MODEL_PARAMS_NON_THINKING = {

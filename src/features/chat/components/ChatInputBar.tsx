@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { IconButton, TextInput, useTheme } from 'react-native-paper';
 import { launchImageLibrary } from 'react-native-image-picker';
-import RNFS from 'react-native-fs';
+import * as RNFS from '@dr.pogodin/react-native-fs';
 import { THINKING_COMMAND, NO_THINKING_COMMAND } from '../../../config/modelConfig';
 import RecordButton from '../../speechToText/components/RecordButton';
 
