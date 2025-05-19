@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Button, Card, Divider, SegmentedButtons, Slider, Text, useTheme } from 'react-native-paper';
+import { Button, Card, Divider, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import Slider from '@react-native-community/slider'; // 从 @react-native-community/slider 导入 Slider
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { 
@@ -56,7 +57,7 @@ const ModelSettingsScreen = () => {
         </View>
         <Slider
           value={value}
-          onValueChange={(value) => updateParam(paramName, value)}
+          onValueChange={(value: number) => updateParam(paramName, value)}
           minimumValue={min}
           maximumValue={max}
           step={step}
@@ -81,7 +82,7 @@ const ModelSettingsScreen = () => {
         <Card.Content>
           <SegmentedButtons
             value={editMode}
-            onValueChange={(value) => setEditMode(value as 'thinking' | 'nonThinking')}
+            onValueChange={(value: string) => setEditMode(value as 'thinking' | 'nonThinking')}
             buttons={[
               { value: 'nonThinking', label: '标准模式' },
               { value: 'thinking', label: '思考模式' }
