@@ -124,7 +124,7 @@ const ModelManagementScreen = () => {
   // 下载示例Qwen3模型（0.6B）
   const handleDownloadQwen = async () => {
     // 小型Qwen3模型的示例URL
-    const qwenUrl = 'https://huggingface.co/Qwen/Qwen1.5-0.5B-Chat-GGUF/resolve/main/qwen1_5-0_5b-chat-q4_k_m.gguf';
+    const qwenUrl = 'https://huggingface.co/Qwen/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q8_0.gguf';
     
     setLocalDownloadUrl(qwenUrl);
     setLocalDownloadFilename(DEFAULT_QWEN_MODEL_FILENAME);
