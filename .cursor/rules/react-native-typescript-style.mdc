@@ -42,7 +42,7 @@ type: Always
     - Use `React.memo` for components that re-render unnecessarily.
     - Use `useCallback` for functions passed as props to memoized children.
     - Use `useMemo` for expensive computations.
-    - Optimize `FlatList` performance (e.g., `keyExtractor`, `getItemLayout`, `initialNumToRender`, `windowSize`).
+    - (Optional, now use ScrollView)Optimize `FlatList` performance (e.g., `keyExtractor`, `getItemLayout`, `initialNumToRender`, `windowSize`).
 - **Accessibility (A11y):**
     - Always include `accessibilityLabel`, `accessibilityHint`, and other relevant accessibility props for interactive elements.
 - **Error Handling:**

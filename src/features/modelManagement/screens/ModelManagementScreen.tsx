@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { ActivityIndicator, Button, Card, Text, useTheme } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -150,7 +150,7 @@ const ModelManagementScreen = () => {
       return (
         <View style={styles.centerContent}>
           <Text style={styles.emptyText}>没有可用的本地模型</Text>
-          <Button 
+          <Button
             mode="contained"
             onPress={handleDownloadQwen}
             style={styles.downloadButton}
@@ -162,18 +162,16 @@ const ModelManagementScreen = () => {
     }
 
     return (
-      <FlatList
-        data={localModels}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
+      <ScrollView contentContainerStyle={styles.listContent}>
+        {localModels.map(item => (
           <ModelListItem
+            key={item.id}
             model={item}
             onSelect={() => handleSelectModel(item)}
             onDelete={() => handleDeleteModel(item)}
           />
-        )}
-        contentContainerStyle={styles.listContent}
-      />
+        ))}
+      </ScrollView>
     );
   };
 

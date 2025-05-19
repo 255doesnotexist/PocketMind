@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -20,6 +20,7 @@ const ChatScreen = () => {
   const { currentModelId } = useSelector((state: RootState) => state.settings);
   const [inputText, setInputText] = useState('');
   const [modelLoaded, setModelLoaded] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // 加载模型
   useEffect(() => {
@@ -150,16 +151,20 @@ const ChatScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
+      <ScrollView
+        style={styles.messagesContainer}
+        contentContainerStyle={{ paddingBottom: 16 }}
+        ref={scrollViewRef}
+        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+      >
+        {messages.map((item) => (
           <MessageBubble
+            key={item.id}
             message={item}
             isThinkingMode={isThinkingModeActive}
           />
-        )}
-      /> */}
+        ))}
+      </ScrollView>
       
       <ChatInputBar
         value={inputText}
@@ -177,6 +182,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messagesContainer: {
+    flex: 1,
     paddingVertical: 16,
     paddingHorizontal: 8,
   },
