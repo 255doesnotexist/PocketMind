@@ -27,6 +27,12 @@ npm run ios
 npm run start
 ```
 
+## 本地构建 Android 调试应用
+
+```bash
+npx expo run:android
+```
+
 ### 注意事项
 
 - 如果修改了 `app.config.js` 中的配置（如图标、启动屏幕等），请记得在构建前运行 `npm run prebuild`
