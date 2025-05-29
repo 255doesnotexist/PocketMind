@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { Card, IconButton, useTheme } from 'react-native-paper';
+import { Card, IconButton, useTheme, Divider } from 'react-native-paper';
 import { parseQwenThinkingTags } from '../utils/ChatHelper';
 import { Message } from '../store/chatSlice';
 import { Image } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 
 interface MessageBubbleProps {
   message: Message;
@@ -40,7 +41,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       <Card style={styles.thinkingContainer}>
         <Card.Title title="思考过程" />
         <Card.Content>
-          <Text style={styles.thinkingText}>{thinkingContent}</Text>
+          <Markdown style={{ body: styles.thinkingText }}>
+            {thinkingContent}
+          </Markdown>
         </Card.Content>
       </Card>
     );
@@ -68,9 +71,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       <View style={[styles.bubble, bubbleStyle]}>
         {renderImage()}
         
-        <Text style={[styles.messageText, textColor]}>
+        <Markdown style={{ body: { ...styles.messageText, ...textColor } }}>
           {visibleContent || (message.pending ? "思考中..." : "")}
-        </Text>
+        </Markdown>
         
         {/* 思考模式指示器 */}
         {hasThinking && (

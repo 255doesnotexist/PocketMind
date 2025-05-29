@@ -5,6 +5,9 @@ import {
   THINKING_COMMAND,
   NO_THINKING_COMMAND,
 } from '../../../config/modelConfig';
+import ChatTemplateParser from '../../../services/ChatTemplateParser';
+import ModelProfileService from '../../../services/ModelProfileService';
+import { ModelProfile } from '../../../config/modelProfiles';
 
 /**
  * 解析Qwen思考标签
@@ -27,7 +30,72 @@ export const parseQwenThinkingTags = (text: string): { visibleContent: string; t
 };
 
 /**
- * 为Qwen模型格式化聊天记录
+ * 为当前模型格式化聊天记录
+ * @param userInput 用户输入
+ * @param history 聊天记录
+ * @param isThinkingMode 是否思考模式
+ * @param isThinkingCommand 是否有思考命令
+ * @param systemMessage 自定义系统消息
+ * @param profileId 模型配置ID
+ * @returns 格式化后的prompt
+ */
+export const formatPromptForModel = async (
+  userInput: string,
+  history: Message[],
+  isThinkingMode: boolean,
+  isThinkingCommand?: boolean,
+  systemMessage?: string,
+  profileId?: string
+): Promise<string> => {
+  // 获取当前模型配置
+  const profile = profileId 
+    ? await ModelProfileService.getProfile(profileId) 
+    : await ModelProfileService.getCurrentProfile();
+
+  if (!profile) {
+    // 回退到原有的 Qwen 格式
+    return formatPromptForQwen(userInput, history, isThinkingMode, isThinkingCommand);
+  }
+
+  // 使用配置中的系统消息或传入的系统消息
+  const finalSystemMessage = systemMessage || profile.default_system_message;
+  
+  // 处理用户输入
+  let processedUserInput = userInput;
+  
+  // 如果模型支持思考模式，处理思考命令
+  if (profile.supports_thinking) {
+    const thinkingCmd = profile.thinking_command || THINKING_COMMAND;
+    const noThinkingCmd = profile.no_thinking_command || NO_THINKING_COMMAND;
+    
+    if (!isThinkingCommand && isThinkingMode) {
+      processedUserInput = `${thinkingCmd}\n${processedUserInput}`;
+    } else if (!isThinkingCommand && !isThinkingMode) {
+      processedUserInput = `${noThinkingCmd}\n${processedUserInput}`;
+    }
+  }
+  
+  // 构建消息历史（包含新的用户输入）
+  const allMessages: Message[] = [
+    ...history,
+    { 
+      id: `temp-${Date.now()}`, 
+      role: 'user' as const, 
+      content: processedUserInput, 
+      timestamp: Date.now() 
+    }
+  ];
+  
+  // 使用模板解析器格式化
+  return ChatTemplateParser.formatChatHistory(
+    profile,
+    allMessages,
+    finalSystemMessage
+  );
+};
+
+/**
+ * 为Qwen模型格式化聊天记录（保持兼容性）
  * @param userInput 用户输入
  * @param history 聊天记录
  * @param isThinkingMode 是否思考模式
