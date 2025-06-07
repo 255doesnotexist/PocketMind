@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { IconButton, TextInput, useTheme } from 'react-native-paper';
-import { launchImageLibrary } from 'react-native-image-picker';
-import * as RNFS from '@dr.pogodin/react-native-fs';
-import { THINKING_COMMAND, NO_THINKING_COMMAND } from '../../../config/modelConfig';
-import RecordButton from '../../speechToText/components/RecordButton';
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { IconButton, TextInput, useTheme } from "react-native-paper";
+import { launchImageLibrary } from "react-native-image-picker";
+import * as RNFS from "@dr.pogodin/react-native-fs";
+import RecordButton from "../../speechToText/components/RecordButton";
 
 interface ChatInputBarProps {
   value: string;
@@ -27,6 +26,9 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
 }) => {
   const theme = useTheme();
   const [isPickingImage, setIsPickingImage] = useState(false);
+  // This local state is for the icon toggle.
+  // The actual thinking mode for sending is handled by ChatScreen using Redux state and ChatHelper.
+  const [thinkingModeActive, setThinkingModeActive] = useState(true);
 
   // 处理图像选择
   const handleImagePick = async () => {
@@ -35,7 +37,7 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
     setIsPickingImage(true);
     try {
       const result = await launchImageLibrary({
-        mediaType: 'photo',
+        mediaType: "photo",
         includeBase64: false,
         maxHeight: 1024,
         maxWidth: 1024,
@@ -43,62 +45,56 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
       if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
         const uri = result.assets[0].uri;
-        
+
         // 读取图像文件为Base64
-        const base64 = await RNFS.readFile(uri, 'base64');
-        
+        const base64 = await RNFS.readFile(uri, "base64");
+
         // 如果提供了图像处理回调，则调用它
         if (onSendImage) {
           onSendImage(base64);
         }
       }
     } catch (error) {
-      console.error('Error picking image:', error);
+      console.error("Error picking image:", error);
     } finally {
       setIsPickingImage(false);
     }
   };
 
-  // 添加/think指令
-  const addThinkCommand = () => {
-    onChangeText(`${THINKING_COMMAND} ${value}`);
-  };
-
-  // 添加/no_think指令
-  const addNoThinkCommand = () => {
-    onChangeText(`${NO_THINKING_COMMAND} ${value}`);
+  const handleSend = () => {
+    if (isGenerating) {
+      // Stop action
+      onSend();
+      return;
+    }
+    // No longer prepending commands here.
+    // ChatScreen will handle command extraction and formatting using ChatHelper.
+    onSend(); // Call the original send handler with the raw input value
   };
 
   return (
     <View style={styles.container}>
+      {/* Thinking Mode Toggle Button */}
       {!isGenerating && (
-        <View style={styles.commandButtons}>
-          <IconButton
-            icon="brain"
-            size={20}
-            iconColor={theme.colors.primary}
-            onPress={addThinkCommand}
-            disabled={disabled}
-          />
-          <IconButton
-            icon="brain-off"
-            size={20}
-            iconColor={theme.colors.primary}
-            onPress={addNoThinkCommand}
-            disabled={disabled}
-          />
-        </View>
+        <IconButton
+          icon={thinkingModeActive ? "brain" : "brain-off"}
+          size={20}
+          iconColor={theme.colors.primary}
+          onPress={() => setThinkingModeActive(!thinkingModeActive)}
+          disabled={disabled}
+          style={{ marginRight: 8 }} // Added for spacing between toggle button and input
+        />
       )}
-      
+
       <TextInput
         style={styles.input}
         value={value}
         mode="outlined"
         placeholder={
-          isGenerating 
-            ? "正在生成回复..." 
-            : disabled 
-              ? "加载模型中..." 
+          isGenerating
+            ? "正在生成回复..."
+            : disabled
+              ? "加载模型中..."
               : "输入消息..."
         }
         onChangeText={onChangeText}
@@ -131,8 +127,8 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
         size={24}
         iconColor={theme.colors.primary}
         style={styles.sendButton}
-        onPress={onSend}
-        disabled={(value.trim() === '' && !isGenerating) || disabled}
+        onPress={handleSend} // Use the new handleSend function
+        disabled={(value.trim() === "" && !isGenerating) || disabled}
       />
     </View>
   );
@@ -140,13 +136,10 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 8,
     marginBottom: 4,
-  },
-  commandButtons: {
-    flexDirection: 'row',
   },
   input: {
     flex: 1,

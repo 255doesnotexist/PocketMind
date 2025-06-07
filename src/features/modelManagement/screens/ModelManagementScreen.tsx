@@ -1,37 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
-import { ActivityIndicator, Button, Card, Text, useTheme } from 'react-native-paper';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../store';
-import { 
-  LocalModelInfo, 
-  addLocalModel, 
-  selectModel, 
-  setDownloadFilename, 
-  setDownloadState, 
-  setDownloadUrl, 
-  setLocalModels, 
-  updateDownloadProgress 
-} from '../store/modelManagementSlice';
-import LocalModelStorageService from '../services/LocalModelStorageService';
-import ModelDownloaderService from '../services/ModelDownloaderService';
-import { setCurrentModelId } from '../../modelSettings/store/settingsSlice';
-import ModelListItem from '../components/ModelListItem';
-import { DEFAULT_QWEN_MODEL_FILENAME } from '../../../config/modelConfig';
-import * as RNFS from '@dr.pogodin/react-native-fs';
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, ScrollView } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  Card,
+  Text,
+  useTheme,
+} from "react-native-paper";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../store";
+import {
+  LocalModelInfo,
+  addLocalModel,
+  selectModel,
+  setDownloadFilename,
+  setDownloadState,
+  setDownloadUrl,
+  setLocalModels,
+  updateDownloadProgress,
+} from "../store/modelManagementSlice";
+import LocalModelStorageService from "../services/LocalModelStorageService";
+import ModelDownloaderService from "../services/ModelDownloaderService";
+import { setCurrentModelId } from "../../modelSettings/store/settingsSlice";
+import ModelListItem from "../components/ModelListItem";
+import { PREDEFINED_MODELS } from "../../../config/modelProfiles"; // Added import
+import * as RNFS from "@dr.pogodin/react-native-fs";
 
 const ModelManagementScreen = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { 
-    localModels, 
-    isDownloading, 
-    downloadProgress,
-  } = useSelector((state: RootState) => state.modelManagement);
-  const currentModelId = useSelector((state: RootState) => state.settings.currentModelId); // Get currentModelId from settings slice
-  
-  const [downloadUrl, setLocalDownloadUrl] = useState<string>('');
-  const [downloadFilename, setLocalDownloadFilename] = useState<string>('');
+  const { localModels, isDownloading, downloadProgress } = useSelector(
+    (state: RootState) => state.modelManagement
+  );
+  const currentModelId = useSelector(
+    (state: RootState) => state.settings.currentModelId
+  ); // Get currentModelId from settings slice
+
+  const [downloadUrl, setLocalDownloadUrl] = useState<string>("");
+  const [downloadFilename, setLocalDownloadFilename] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
   // 加载本地模型列表
@@ -50,7 +56,7 @@ const ModelManagementScreen = () => {
         dispatch(setCurrentModelId(models[0].id));
       }
     } catch (error) {
-      console.error('Error loading local models:', error);
+      console.error("Error loading local models:", error);
     } finally {
       setIsLoading(false);
     }
@@ -79,11 +85,11 @@ const ModelManagementScreen = () => {
   // 下载模型
   const handleDownloadModel = async () => {
     if (!downloadUrl || !downloadFilename) return;
-    
+
     dispatch(setDownloadState(true));
     dispatch(setDownloadUrl(downloadUrl));
     dispatch(setDownloadFilename(downloadFilename));
-    
+
     try {
       const modelPath = await ModelDownloaderService.downloadModel(
         downloadUrl,
@@ -92,11 +98,11 @@ const ModelManagementScreen = () => {
           dispatch(updateDownloadProgress(progress));
         }
       );
-      
+
       if (modelPath) {
         // 获取模型信息
         const size = await LocalModelStorageService.getModelSize(modelPath);
-        
+
         // 添加到本地模型列表
         const newModel: LocalModelInfo = {
           id: downloadFilename,
@@ -105,17 +111,17 @@ const ModelManagementScreen = () => {
           size,
           lastModified: Date.now(),
         };
-        
+
         dispatch(addLocalModel(newModel));
         dispatch(selectModel(newModel.id));
         dispatch(setCurrentModelId(newModel.id));
-        
+
         // 清空输入
-        setLocalDownloadUrl('');
-        setLocalDownloadFilename('');
+        setLocalDownloadUrl("");
+        setLocalDownloadFilename("");
       }
     } catch (error) {
-      console.error('Error downloading model:', error);
+      console.error("Error downloading model:", error);
     } finally {
       dispatch(setDownloadState(false));
     }
@@ -124,11 +130,20 @@ const ModelManagementScreen = () => {
   // 下载示例Qwen3模型（0.6B）
   const handleDownloadQwen = async () => {
     // 小型Qwen3模型的示例URL
-    const qwenUrl = 'https://huggingface.co/Qwen/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q8_0.gguf';
-    
+    const qwenModelKey = "qwen3-0.6b-gguf"; // Key for the predefined Qwen model
+    const qwenPredefinedModel = PREDEFINED_MODELS[qwenModelKey];
+
+    if (!qwenPredefinedModel) {
+      console.error(`Predefined model ${qwenModelKey} not found.`);
+      return;
+    }
+
+    const qwenUrl = qwenPredefinedModel.download_url;
+    const qwenFilename = qwenPredefinedModel.filename;
+
     setLocalDownloadUrl(qwenUrl);
-    setLocalDownloadFilename(DEFAULT_QWEN_MODEL_FILENAME);
-    
+    setLocalDownloadFilename(qwenFilename); // Use filename from predefined model
+
     // 自动开始下载
     setTimeout(() => {
       handleDownloadModel();
@@ -163,7 +178,7 @@ const ModelManagementScreen = () => {
 
     return (
       <ScrollView contentContainerStyle={styles.listContent}>
-        {localModels.map(item => (
+        {localModels.map((item) => (
           <ModelListItem
             key={item.id}
             model={item}
@@ -192,9 +207,9 @@ const ModelManagementScreen = () => {
               <Text>{`${downloadProgress.percentage}%`}</Text>
             </>
           )}
-          <ActivityIndicator 
-            style={styles.progressIndicator} 
-            color={theme.colors.primary} 
+          <ActivityIndicator
+            style={styles.progressIndicator}
+            color={theme.colors.primary}
           />
         </Card.Content>
       </Card>
@@ -202,7 +217,9 @@ const ModelManagementScreen = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {renderContent()}
       {renderDownloadProgress()}
     </View>
@@ -216,8 +233,8 @@ const styles = StyleSheet.create({
   },
   centerContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 16,

@@ -1,8 +1,11 @@
-import { initLlama, LlamaContext, CompletionParams, releaseAllLlama } from 'llama.rn'; // Changed releaseLlama to releaseAllLlama, removed loadModelInfo
-import { 
-  DEFAULT_MODEL_PARAMS_NON_THINKING, 
-  DEFAULT_MODEL_PARAMS_THINKING 
-} from '../../../config/modelConfig';
+import {
+  initLlama,
+  LlamaContext,
+  CompletionParams,
+  releaseAllLlama,
+} from "llama.rn";
+import ModelProfileServiceInstance from "../../../services/ModelProfileService";
+import { ModelProfile, ModelParams } from "../../../config/modelProfiles";
 
 class LlamaService {
   private llamaContext: LlamaContext | null = null;
@@ -18,10 +21,11 @@ class LlamaService {
    * @param params 初始化参数
    * @returns 初始化是否成功
    */
-  async initLlama(modelPath: string, params?: any): Promise<boolean> { // Changed InitContextOptions to any
+  async initLlama(modelPath: string, params?: any): Promise<boolean> {
+    // Changed InitContextOptions to any
     try {
       if (this.llamaContext && this.currentModelPath === modelPath) {
-        console.log('Llama context already initialized with this model.');
+        console.log("Llama context already initialized with this model.");
         return true;
       }
       if (this.llamaContext) {
@@ -29,12 +33,13 @@ class LlamaService {
       }
       console.log(`Initializing Llama with model: ${modelPath}`);
       // @ts-ignore TODO: llama.rn types might be incorrect for initLlama params
-      this.llamaContext = await initLlama({ model: modelPath, ...params }); 
+      this.llamaContext = await initLlama({ model: modelPath, ...params });
       this.currentModelPath = modelPath;
-      console.log('Llama context initialized successfully.');
+      console.log("Llama context initialized successfully.");
       return true;
-    } catch (error: any) { // Added type for error
-      console.error('Error initializing Llama context:', error);
+    } catch (error: any) {
+      // Added type for error
+      console.error("Error initializing Llama context:", error);
       this.llamaContext = null;
       this.currentModelPath = null;
       return false;
@@ -50,57 +55,79 @@ class LlamaService {
    */
   async generateCompletion(
     prompt: string,
-    llamaParams?: CompletionParams,
+    llamaParams?: Partial<ModelParams>, // Changed from CompletionParams to Partial<ModelParams>
     isThinkingMode: boolean = false,
     onToken?: (token: string) => void
-  ): Promise<{ text: string; timings?: any }> { // Changed CompletionTimings to any
+  ): Promise<{ text: string; timings?: any }> {
     if (!this.llamaContext) {
-      console.error('Llama context not initialized.');
-      return { text: '' };
+      console.error("Llama context not initialized.");
+      return { text: "" };
     }
 
     if (this.generationInProgress) {
-      console.warn('Generation already in progress. Please wait or stop the current generation.');
-      return { text: '' };
+      console.warn(
+        "Generation already in progress. Please wait or stop the current generation."
+      );
+      return { text: "" };
     }
 
     this.generationInProgress = true;
     this.abortController = new AbortController();
     const { signal } = this.abortController;
 
-    // 根据思考模式选择默认参数
-    const defaultParams = isThinkingMode 
-      ? DEFAULT_MODEL_PARAMS_THINKING 
-      : DEFAULT_MODEL_PARAMS_NON_THINKING;
+    const profile = await ModelProfileServiceInstance.getCurrentProfile();
+    if (!profile) {
+      console.error(
+        "Current model profile not found. Cannot generate completion."
+      );
+      this.generationInProgress = false;
+      return { text: "" };
+    }
+
+    // 根据思考模式选择默认参数 from profile
+    const baseParams: ModelParams = isThinkingMode
+      ? profile.params_thinking // Corrected property name
+      : profile.params_non_thinking; // Corrected property name
 
     // 合并参数
-    const finalParams = { ...defaultParams, ...llamaParams, prompt };
+    // Ensure the final structure is compatible with llama.rn's CompletionParams
+    const finalParams: CompletionParams = {
+      ...baseParams, // Defaults from profile
+      ...llamaParams, // User-provided overrides
+      prompt, // Prompt is always required
+      // slot_id might be managed by profile or higher-level logic if needed for caching
+    };
 
     try {
-      let resultText = '';
+      let resultText = "";
       // @ts-ignore TODO: llama.rn types might be incorrect for completion callback and stopCompletion
-      const { text, timings } = await this.llamaContext.completion(finalParams, (data) => {
-        if (signal.aborted) {
-          // @ts-ignore
-          this.llamaContext.stopCompletion(); 
-          return;
+      const { text, timings } = await this.llamaContext.completion(
+        finalParams,
+        (data) => {
+          if (signal.aborted) {
+            // @ts-ignore
+            this.llamaContext.stopCompletion();
+            return;
+          }
+          const token = data.token;
+          resultText += token;
+          if (onToken) {
+            onToken(token);
+          }
         }
-        const token = data.token;
-        resultText += token;
-        if (onToken) {
-          onToken(token);
-        }
-      });
+      );
       this.generationInProgress = false;
       return { text: resultText, timings };
-    } catch (error: any) { // Added type for error
+    } catch (error: any) {
+      // Added type for error
       this.generationInProgress = false;
-      if (error && error.message === 'Aborted') { // Added check for error existence
-        console.log('Generation aborted by user.');
-        return { text: '' };
+      if (error && error.message === "Aborted") {
+        // Added check for error existence
+        console.log("Generation aborted by user.");
+        return { text: "" };
       }
-      console.error('Error during Llama completion:', error);
-      return { text: '' };
+      console.error("Error during Llama completion:", error);
+      return { text: "" };
     }
   }
 
@@ -108,13 +135,14 @@ class LlamaService {
    * 停止当前生成
    */
   async stopGeneration(): Promise<void> {
-    if (this.abortController) { // Fixed: Added parentheses
+    if (this.abortController) {
+      // Fixed: Added parentheses
       this.abortController.abort();
       // It's also good practice to have a direct stop method in llama.rn if possible
       // and call it here, e.g., this.llamaContext?.stop();
     }
     this.generationInProgress = false;
-    console.log('Generation stop requested.');
+    console.log("Generation stop requested.");
   }
 
   /**
@@ -140,9 +168,10 @@ class LlamaService {
     if (this.llamaContext) {
       try {
         await releaseAllLlama(); // Use releaseAllLlama from import
-        console.log('Llama context released.');
-      } catch (error: any) { // Added type for error
-        console.error('Error releasing Llama context:', error);
+        console.log("Llama context released.");
+      } catch (error: any) {
+        // Added type for error
+        console.error("Error releasing Llama context:", error);
       }
       this.llamaContext = null;
       this.currentModelPath = null;
@@ -154,15 +183,17 @@ class LlamaService {
    * @param modelPath 模型路径
    * @returns 模型信息
    */
-  async loadModelInfo(modelPath: string): Promise<any | null> { // Changed ModelInfo to any
+  async loadModelInfo(modelPath: string): Promise<any | null> {
+    // Changed ModelInfo to any
     try {
       console.log(`Loading model info for: ${modelPath}`);
       // @ts-ignore TODO: loadModelInfo might not be exported or might have a different name
-      const modelInfo = await this.llamaContext?.loadModelInfo(modelPath); 
-      console.log('Model info loaded:', modelInfo);
+      const modelInfo = await this.llamaContext?.loadModelInfo(modelPath);
+      console.log("Model info loaded:", modelInfo);
       return modelInfo;
-    } catch (error: any) { // Added type for error
-      console.error('Error loading model info:', error);
+    } catch (error: any) {
+      // Added type for error
+      console.error("Error loading model info:", error);
       return null;
     }
   }
